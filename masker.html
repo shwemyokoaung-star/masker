@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email & Custom Text Masker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons for crisp modern UI icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Subtle background grid pattern */
+    .bg-grid-pattern {
+      background-size: 24px 24px;
+      background-image: radial-gradient(circle, rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen bg-grid-pattern flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="ph-bold ph-shield-check text-xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-tight leading-none flex items-center gap-2">
+            MaskCraft <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">Exact Count v1.0</span>
+          </h1>
+          <p class="text-xs text-slate-400 mt-1">4-Character Retention & 1:1 Zero-Miscount Blocker</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Exact 1:1 Strict Match
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-6">
+
+    <!-- Preset Quick-Fill Bar -->
+    <div class="flex flex-wrap items-center gap-2 p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-sm">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mr-1">
+        <i class="ph ph-lightning text-amber-400"></i> Try Presets:
+      </span>
+      <button onclick="applyPreset('shwemyokoaung@gmail.com')" class="px-3 py-1 text-xs font-medium bg-slate-800 hover:bg-indigo-950/70 hover:border-indigo-500/40 border border-slate-700 rounded-lg text-slate-300 hover:text-indigo-200 transition-all flex items-center gap-1.5">
+        <span class="text-indigo-400">shwemyokoaung@gmail.com</span>
+      </button>
+      <button onclick="applyPreset('developer@gmail.com')" class="px-3 py-1 text-xs font-medium bg-slate-800 hover:bg-indigo-950/70 hover:border-indigo-500/40 border border-slate-700 rounded-lg text-slate-300 hover:text-indigo-200 transition-all">
+        developer@gmail.com
+      </button>
+      <button onclick="applyPreset('testuser123@gmail.com')" class="px-3 py-1 text-xs font-medium bg-slate-800 hover:bg-indigo-950/70 hover:border-indigo-500/40 border border-slate-700 rounded-lg text-slate-300 hover:text-indigo-200 transition-all">
+        testuser123@gmail.com
+      </button>
+      <button onclick="applyPreset('alex@gmail.com')" class="px-3 py-1 text-xs font-medium bg-slate-800 hover:bg-indigo-950/70 hover:border-indigo-500/40 border border-slate-700 rounded-lg text-slate-300 hover:text-indigo-200 transition-all">
+        alex@gmail.com (<=4 edge case)
+      </button>
+    </div>
+
+    <!-- Mode and Configurations -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Masking Character Selection -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Masking Token</label>
+          <span class="text-[11px] text-slate-500">1:1 character swap</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="grid grid-cols-4 gap-2 flex-1">
+            <button onclick="setMaskChar('x')" id="btn-mask-x" class="mask-opt-btn active py-1.5 text-sm font-mono-code font-bold rounded-lg border border-indigo-500 bg-indigo-600/20 text-indigo-300">x</button>
+            <button onclick="setMaskChar('*')" id="btn-mask-*" class="mask-opt-btn py-1.5 text-sm font-mono-code font-bold rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-750 text-slate-300">*</button>
+            <button onclick="setMaskChar('•')" id="btn-mask-•" class="mask-opt-btn py-1.5 text-sm font-mono-code font-bold rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-750 text-slate-300">•</button>
+            <button onclick="setMaskChar('#')" id="btn-mask-#" class="mask-opt-btn py-1.5 text-sm font-mono-code font-bold rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-750 text-slate-300">#</button>
+          </div>
+          <input type="text" id="customMaskInput" maxlength="1" placeholder="Custom" oninput="handleCustomMask(this.value)" class="w-16 text-center text-sm font-mono-code bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200 focus:outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <!-- Keep Count Settings -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Visible Characters</label>
+          <span class="text-[11px] text-slate-500">Retained before domain</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="range" id="keepCharsSlider" min="1" max="8" value="4" oninput="updateVisibleCount(this.value)" class="w-full accent-indigo-500 cursor-pointer">
+          <span id="visibleCountBadge" class="font-mono-code font-bold text-sm bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-3 py-1 rounded-lg">4 chars</span>
+        </div>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Processing Mode</label>
+          <span class="text-[11px] text-slate-500" id="modeDescriptor">Single Entry</span>
+        </div>
+        <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+          <button id="singleModeBtn" onclick="setMode('single')" class="flex-1 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white shadow transition-all">Single Line</button>
+          <button id="batchModeBtn" onclick="setMode('batch')" class="flex-1 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition-all">Batch Multi-line</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workspace: Input and Output Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Input Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <label for="inputText" class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+              <i class="ph ph-textbox text-indigo-400 text-base"></i> Input Text / Email
+            </label>
+            <button onclick="clearInput()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+              <i class="ph ph-trash"></i> Clear
+            </button>
+          </div>
+
+          <!-- Dynamic Input (Single or Multiline) -->
+          <div id="singleInputWrap">
+            <input type="text" id="inputText" placeholder="e.g. shwemyokoaung@gmail.com" value="shwemyokoaung@gmail.com" oninput="processTransform()" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3.5 text-slate-100 placeholder-slate-600 font-mono-code text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all">
+          </div>
+          <div id="batchInputWrap" class="hidden">
+            <textarea id="inputTextBatch" rows="7" placeholder="Paste multiple lines/emails here...&#10;shwemyokoaung@gmail.com&#10;developer@gmail.com" oninput="processTransform()" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3.5 text-slate-100 placeholder-slate-600 font-mono-code text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Live Input Metrics (like charactercountonline) -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-center">
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="text-[11px] text-slate-400 font-medium">Total Characters</div>
+            <div id="inputTotalChars" class="font-mono-code text-base font-bold text-slate-200 mt-0.5">23</div>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="text-[11px] text-slate-400 font-medium">Username Length</div>
+            <div id="inputUsernameChars" class="font-mono-code text-base font-bold text-indigo-400 mt-0.5">13</div>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="text-[11px] text-slate-400 font-medium">Domain Detect</div>
+            <div id="inputDomainName" class="font-mono-code text-xs font-semibold text-emerald-400 truncate mt-1">@gmail.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+              <i class="ph ph-sparkle text-indigo-400 text-base"></i> Masked Output
+            </label>
+            <div class="flex items-center gap-2">
+              <span id="validationPill" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Exact Count Verified
+              </span>
+            </div>
+          </div>
+
+          <!-- Dynamic Output (Single or Multiline) -->
+          <div id="singleOutputWrap">
+            <div class="relative group">
+              <input type="text" id="outputText" readonly value="xxxxxxxxxaung@gmail.com" class="w-full bg-slate-950 border border-indigo-500/30 rounded-xl p-3.5 text-indigo-300 font-mono-code text-sm focus:outline-none select-all cursor-text transition-all">
+              <button onclick="copyToClipboard('outputText')" class="absolute right-2 top-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 shadow-md active:scale-95">
+                <i class="ph ph-copy text-sm"></i> Copy
+              </button>
+            </div>
+          </div>
+          <div id="batchOutputWrap" class="hidden relative group">
+            <textarea id="outputTextBatch" rows="7" readonly class="w-full bg-slate-950 border border-indigo-500/30 rounded-xl p-3.5 text-indigo-300 font-mono-code text-sm focus:outline-none select-all resize-none"></textarea>
+            <button onclick="copyToClipboard('outputTextBatch')" class="absolute right-3 top-3 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 shadow-md active:scale-95">
+              <i class="ph ph-copy text-sm"></i> Copy All
+            </button>
+          </div>
+        </div>
+
+        <!-- Output Breakdown Stats -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-center">
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="text-[11px] text-amber-400/90 font-medium">Masked ('<span id="statMaskToken">x</span>')</div>
+            <div id="outputMaskedChars" class="font-mono-code text-base font-bold text-amber-400 mt-0.5">9</div>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="text-[11px] text-teal-400 font-medium">Preserved Chars</div>
+            <div id="outputPreservedChars" class="font-mono-code text-base font-bold text-teal-400 mt-0.5">4</div>
+          </div>
+          <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="text-[11px] text-indigo-400 font-medium">Output Length</div>
+            <div id="outputTotalChars" class="font-mono-code text-base font-bold text-indigo-300 mt-0.5">23</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zero-Miscount Mathematical Audit Card -->
+    <div class="bg-slate-900/70 border border-slate-800/90 rounded-2xl p-5 shadow-lg">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/70 gap-2">
+        <div class="flex items-center gap-2">
+          <i class="ph-bold ph-scales text-indigo-400"></i>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wide">Zero-Miscount Exact Audit</h2>
+        </div>
+        <div id="parityBadge" class="text-xs font-mono-code px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-flex items-center gap-1.5 self-start sm:self-auto">
+          <i class="ph-bold ph-check"></i> 100% Length Parity (Input = Output)
+        </div>
+      </div>
+
+      <!-- Visual Color-Coded Decomposition Bar -->
+      <div class="mt-4">
+        <div class="text-xs text-slate-400 mb-2 flex items-center justify-between">
+          <span>Deconstruction of Primary String:</span>
+          <span class="font-mono-code text-[11px] text-slate-500" id="auditFormulaText">9 masked + 4 visible + 10 domain = 23</span>
+        </div>
+
+        <div class="h-10 w-full rounded-xl overflow-hidden flex font-mono-code text-xs font-semibold select-none border border-slate-800">
+          <!-- Masked Segment -->
+          <div id="barMasked" style="width: 39%;" class="bg-amber-600/30 border-r border-amber-500/40 text-amber-300 flex items-center justify-center transition-all duration-300 px-2 overflow-hidden truncate">
+            <span id="barMaskedText">9 × 'x'</span>
+          </div>
+          <!-- Revealed Segment -->
+          <div id="barRevealed" style="width: 17.5%;" class="bg-teal-600/30 border-r border-teal-500/40 text-teal-300 flex items-center justify-center transition-all duration-300 px-2 overflow-hidden truncate">
+            <span id="barRevealedText">4 'aung'</span>
+          </div>
+          <!-- Domain Segment -->
+          <div id="barDomain" style="width: 43.5%;" class="bg-indigo-600/30 text-indigo-300 flex items-center justify-center transition-all duration-300 px-2 overflow-hidden truncate">
+            <span id="barDomainText">@gmail.com (10)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Rule Breakdown Table -->
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-500 block mb-1">1. User Prefix to Mask</span>
+          <p id="ruleStep1" class="font-mono-code text-amber-300 font-medium break-all">shwemyok (9 chars)</p>
+          <span class="text-[10px] text-slate-500 mt-1 block">Replaced exactly with 9 'x'</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-500 block mb-1">2. Preserved Ending</span>
+          <p id="ruleStep2" class="font-mono-code text-teal-300 font-medium break-all">aung (4 chars)</p>
+          <span class="text-[10px] text-slate-500 mt-1 block">Protected 4 characters</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-500 block mb-1">3. Domain / Suffix</span>
+          <p id="ruleStep3" class="font-mono-code text-indigo-300 font-medium break-all">@gmail.com (10 chars)</p>
+          <span class="text-[10px] text-slate-500 mt-1 block">Preserved untouched</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 transform translate-y-24 opacity-0 transition-all duration-300 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-sm font-medium border border-indigo-400/40">
+    <i class="ph-bold ph-check-circle text-lg"></i>
+    <span id="toastMessage">Copied to clipboard!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/60 py-4 bg-slate-950 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4">
+      MaskCraft &bull; Exact Character Counting Engine &bull; Strictly 1:1 Parity Verified
+    </div>
+  </footer>
+
+  <script>
+    // State management
+    let maskChar = 'x';
+    let visibleCount = 4;
+    let currentMode = 'single'; // 'single' or 'batch'
+
+    /**
+     * Core Algorithm: Masks all characters prior to the last `visibleCount` characters before domain.
+     * Guarantees exact 1-to-1 character count parity (Restriction: zero miscount).
+     * @param {string} str - Raw input string
+     * @param {number} retainCount - Number of characters to retain before domain (default: 4)
+     * @param {string} token - Character used for masking
+     * @returns {Object} Structured breakdown and masked string
+     */
+    function maskString(str, retainCount = 4, token = 'x') {
+      if (!str || str.length === 0) {
+        return {
+          original: '',
+          maskedString: '',
+          prefix: '',
+          revealed: '',
+          domain: '',
+          maskedLength: 0,
+          revealedLength: 0,
+          domainLength: 0,
+          totalOriginal: 0,
+          totalMasked: 0,
+          isExactMatch: true,
+          status: 'empty'
+        };
+      }
+
+      // Check for domain occurrence (@...)
+      const atIndex = str.lastIndexOf('@');
+      let username = '';
+      let domain = '';
+
+      if (atIndex !== -1) {
+        username = str.slice(0, atIndex);
+        domain = str.slice(atIndex); // includes '@' and domain (e.g. '@gmail.com')
+      } else {
+        username = str;
+        domain = '';
+      }
+
+      const userLen = username.length;
+      let prefix = '';
+      let revealed = '';
+      let maskedUsername = '';
+      let status = 'normal';
+
+      if (userLen <= retainCount) {
+        // Edge case: username has <= retainCount characters.
+        // It cannot mask without destroying the requested retain characters.
+        revealed = username;
+        prefix = '';
+        maskedUsername = username;
+        status = 'short';
+      } else {
+        const maskLength = userLen - retainCount;
+        prefix = username.slice(0, maskLength);
+        revealed = username.slice(maskLength);
+        maskedUsername = token.repeat(maskLength) + revealed;
+        status = 'masked';
+      }
+
+      const maskedString = maskedUsername + domain;
+
+      return {
+        original: str,
+        maskedString: maskedString,
+        prefix: prefix,
+        revealed: revealed,
+        domain: domain,
+        maskedLength: prefix.length,
+        revealedLength: revealed.length,
+        domainLength: domain.length,
+        totalOriginal: str.length,
+        totalMasked: maskedString.length,
+        isExactMatch: str.length === maskedString.length,
+        status: status
+      };
+    }
+
+    /**
+     * Executes transform pipeline and updates all UI elements
+     */
+    function processTransform() {
+      if (currentMode === 'single') {
+        const inputVal = document.getElementById('inputText').value;
+        const res = maskString(inputVal, visibleCount, maskChar);
+
+        // Update Output Input
+        document.getElementById('outputText').value = res.maskedString;
+
+        // Update Input Counters
+        document.getElementById('inputTotalChars').innerText = res.totalOriginal;
+        document.getElementById('inputUsernameChars').innerText = res.prefix.length + res.revealed.length;
+        document.getElementById('inputDomainName').innerText = res.domain ? res.domain : '(none)';
+
+        // Update Output Counters
+        document.getElementById('statMaskToken').innerText = maskChar;
+        document.getElementById('outputMaskedChars').innerText = res.maskedLength;
+        document.getElementById('outputPreservedChars').innerText = res.revealedLength;
+        document.getElementById('outputTotalChars').innerText = res.totalMasked;
+
+        // Update Parity Badges
+        const parityBadge = document.getElementById('parityBadge');
+        const validationPill = document.getElementById('validationPill');
+
+        if (res.isExactMatch && res.totalOriginal > 0) {
+          parityBadge.className = "text-xs font-mono-code px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-flex items-center gap-1.5 self-start sm:self-auto";
+          parityBadge.innerHTML = `<i class="ph-bold ph-check"></i> Zero Miscount: ${res.totalOriginal} in = ${res.totalMasked} out`;
+
+          validationPill.className = "text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+          validationPill.innerText = res.status === 'short' ? `Preserved (≤${visibleCount} chars)` : "Exact Count Verified";
+        } else if (res.totalOriginal === 0) {
+          parityBadge.className = "text-xs font-mono-code px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 inline-flex items-center gap-1.5 self-start sm:self-auto";
+          parityBadge.innerHTML = `<i class="ph ph-hourglass"></i> Awaiting text`;
+
+          validationPill.className = "text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+          validationPill.innerText = "Awaiting input";
+        }
+
+        // Update Visual Audit Bar Widths and Labels
+        const total = res.totalOriginal;
+        const barMasked = document.getElementById('barMasked');
+        const barRevealed = document.getElementById('barRevealed');
+        const barDomain = document.getElementById('barDomain');
+
+        if (total > 0) {
+          const maskedPct = (res.maskedLength / total) * 100;
+          const revealedPct = (res.revealedLength / total) * 100;
+          const domainPct = (res.domainLength / total) * 100;
+
+          barMasked.style.width = `${maskedPct}%`;
+          barRevealed.style.width = `${revealedPct}%`;
+          barDomain.style.width = `${domainPct}%`;
+
+          document.getElementById('barMaskedText').innerText = res.maskedLength > 0 ? `${res.maskedLength} × '${maskChar}'` : `0 masked`;
+          document.getElementById('barRevealedText').innerText = res.revealedLength > 0 ? `${res.revealedLength} '${res.revealed}'` : `0`;
+          document.getElementById('barDomainText').innerText = res.domain ? `${res.domain} (${res.domainLength})` : `No domain (0)`;
+
+          document.getElementById('auditFormulaText').innerText = `${res.maskedLength} masked + ${res.revealedLength} visible + ${res.domainLength} domain = ${res.totalMasked}`;
+
+          document.getElementById('ruleStep1').innerText = res.prefix ? `${res.prefix} (${res.maskedLength} chars)` : '(None to mask)';
+          document.getElementById('ruleStep2').innerText = res.revealed ? `${res.revealed} (${res.revealedLength} chars)` : '(None)';
+          document.getElementById('ruleStep3').innerText = res.domain ? `${res.domain} (${res.domainLength} chars)` : '(No domain)';
+        } else {
+          barMasked.style.width = '0%';
+          barRevealed.style.width = '0%';
+          barDomain.style.width = '100%';
+          document.getElementById('barDomainText').innerText = 'Empty input';
+          document.getElementById('auditFormulaText').innerText = '0 chars';
+        }
+
+      } else {
+        // Multi-line Batch Processing
+        const inputBatch = document.getElementById('inputTextBatch').value;
+        const lines = inputBatch.split('\n');
+        let totalInputChars = 0;
+        let totalOutputChars = 0;
+        let totalMaskedCount = 0;
+        let totalPreservedCount = 0;
+
+        const processedLines = lines.map(line => {
+          if (!line.trim()) return '';
+          const res = maskString(line, visibleCount, maskChar);
+          totalInputChars += res.totalOriginal;
+          totalOutputChars += res.totalMasked;
+          totalMaskedCount += res.maskedLength;
+          totalPreservedCount += res.revealedLength;
+          return res.maskedString;
+        });
+
+        document.getElementById('outputTextBatch').value = processedLines.join('\n');
+
+        // Update overall Batch counters
+        document.getElementById('inputTotalChars').innerText = totalInputChars;
+        document.getElementById('inputUsernameChars').innerText = lines.filter(l => l.trim().length > 0).length + " lines";
+        document.getElementById('inputDomainName').innerText = "Batch mode";
+
+        document.getElementById('outputMaskedChars').innerText = totalMaskedCount;
+        document.getElementById('outputPreservedChars').innerText = totalPreservedCount;
+        document.getElementById('outputTotalChars').innerText = totalOutputChars;
+
+        const parityBadge = document.getElementById('parityBadge');
+        parityBadge.innerHTML = `<i class="ph-bold ph-check"></i> Batch Zero Miscount: ${totalInputChars} = ${totalOutputChars}`;
+      }
+    }
+
+    /**
+     * Updates active mask character
+     */
+    function setMaskChar(char) {
+      maskChar = char;
+      document.getElementById('customMaskInput').value = '';
+      
+      // Update button styling
+      document.querySelectorAll('.mask-opt-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'bg-indigo-600/20', 'text-indigo-300');
+        btn.classList.add('border-slate-700', 'bg-slate-800', 'text-slate-300');
+      });
+
+      const activeBtn = document.getElementById(`btn-mask-${char}`);
+      if (activeBtn) {
+        activeBtn.classList.add('border-indigo-500', 'bg-indigo-600/20', 'text-indigo-300');
+        activeBtn.classList.remove('border-slate-700', 'bg-slate-800', 'text-slate-300');
+      }
+
+      processTransform();
+    }
+
+    /**
+     * Handles custom single character mask input
+     */
+    function handleCustomMask(val) {
+      if (val && val.length > 0) {
+        maskChar = val[0];
+        document.querySelectorAll('.mask-opt-btn').forEach(btn => {
+          btn.classList.remove('border-indigo-500', 'bg-indigo-600/20', 'text-indigo-300');
+          btn.classList.add('border-slate-700', 'bg-slate-800', 'text-slate-300');
+        });
+        processTransform();
+      }
+    }
+
+    /**
+     * Updates the number of visible characters to preserve
+     */
+    function updateVisibleCount(val) {
+      visibleCount = parseInt(val, 10);
+      document.getElementById('visibleCountBadge').innerText = `${visibleCount} chars`;
+      processTransform();
+    }
+
+    /**
+     * Sets single line or batch mode
+     */
+    function setMode(mode) {
+      currentMode = mode;
+      const singleBtn = document.getElementById('singleModeBtn');
+      const batchBtn = document.getElementById('batchModeBtn');
+      const singleIn = document.getElementById('singleInputWrap');
+      const batchIn = document.getElementById('batchInputWrap');
+      const singleOut = document.getElementById('singleOutputWrap');
+      const batchOut = document.getElementById('batchOutputWrap');
+      const modeDesc = document.getElementById('modeDescriptor');
+
+      if (mode === 'single') {
+        singleBtn.className = "flex-1 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white shadow transition-all";
+        batchBtn.className = "flex-1 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition-all";
+        singleIn.classList.remove('hidden');
+        batchIn.classList.add('hidden');
+        singleOut.classList.remove('hidden');
+        batchOut.classList.add('hidden');
+        modeDesc.innerText = "Single Entry";
+      } else {
+        batchBtn.className = "flex-1 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white shadow transition-all";
+        singleBtn.className = "flex-1 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition-all";
+        singleIn.classList.add('hidden');
+        batchIn.classList.remove('hidden');
+        singleOut.classList.add('hidden');
+        batchOut.classList.remove('hidden');
+        modeDesc.innerText = "Multi-line Batch";
+
+        // Seed with sample batch if empty
+        if (!document.getElementById('inputTextBatch').value) {
+          document.getElementById('inputTextBatch').value = "shwemyokoaung@gmail.com\ndeveloper@gmail.com\ntestuser123@gmail.com\nalex@gmail.com";
+        }
+      }
+      processTransform();
+    }
+
+    /**
+     * Applies preset to input and runs calculation
+     */
+    function applyPreset(text) {
+      if (currentMode === 'batch') {
+        setMode('single');
+      }
+      const inputEl = document.getElementById('inputText');
+      inputEl.value = text;
+      processTransform();
+      showToast(`Loaded preset: ${text}`);
+    }
+
+    /**
+     * Clears current inputs
+     */
+    function clearInput() {
+      if (currentMode === 'single') {
+        document.getElementById('inputText').value = '';
+      } else {
+        document.getElementById('inputTextBatch').value = '';
+      }
+      processTransform();
+    }
+
+    /**
+     * Copies output string to clipboard with iframe-safe fallback
+     */
+    function copyToClipboard(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      el.select();
+      el.setSelectionRange(0, 99999); // Mobile compatibility
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showToast('Copied masked result to clipboard!');
+        } else {
+          showToast('Failed to copy. Please manually copy.');
+        }
+      } catch (err) {
+        showToast('Selection ready to copy manually.');
+      }
+    }
+
+    /**
+     * Displays transient toast notification
+     */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2200);
+    }
+
+    // Initial load setup
+    window.onload = function() {
+      processTransform();
+    };
+  </script>
+</body>
+</html>
